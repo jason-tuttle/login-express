@@ -1,6 +1,8 @@
 const express = require('express');
 const mustacheExpress = require('mustache-express');
 const session = require('express-session');
+const expressValidator = require('express-validator');
+const bodyParser = require("body-parser");
 
 const app = express();
 
@@ -14,11 +16,18 @@ app.use(session({
   saveUninitialized: true
 }));
 
+app.use(bodyParser.urlencoded({extended: true}));
+
+// use validator to check form submissions
+app.use(expressValidator());
+
 app.use(function(req, res, next) {
-  //const users = req.session.users = req.session.users || { "admin": "password" };
-  if (!req.session) {
-    req.session.users = { "admin": "password" };
-    req.session.status = { "loggedIn": false };
+
+  if (!req.session.users) {
+    req.session.users = { admin: {pw:"password", username:"admin"} };
+    req.session.status = { loggedIn: false };
+    req.session.user = "";
+    console.log(req.session);
     res.redirect('login');
   }
   next();
@@ -26,6 +35,12 @@ app.use(function(req, res, next) {
 
 app.get('/', function(req, res) {
   //check if logged in
+  res.send('bacon');
+  if (req.session.loggedIn) {
+    res.render('index', { username: req.session.user });
+  } else {
+    res.redirect('login');
+  }
   //if yes render page
   //if no send to '/login'
 });
@@ -37,6 +52,20 @@ app.get('/login', function(req, res) {
 
 app.post('/login', function(req, res) {
   //check form submission for username:password match
+  req.checkBody('username', 'please enter a username').notEmpty();
+  req.checkBody('password', 'username and password don\'t match')
+    .notEmpty()
+    .equals(req.session.users[req.body.username].pw);
   //if good send to '/'
   //if not display error and reload form
-})
+  const errors = req.validationErrors();
+  if (errors) {
+    res.render('login', { errors: errors[0].msg });
+  } else {
+    req.session.loggedIn = true;
+    req.session.user = req.body.username;
+    res.render('index', { username: req.session.user })
+  }
+});
+
+app.listen(3000, () => console.log('Servin\' on :3000...'));

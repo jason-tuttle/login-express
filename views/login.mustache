@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Login</title>
+  </head>
+  <body>
+    <h1>Welcome. Please log in.</h1>
+    <form class="login-form" action="/login" method="post">
+      <label for="username">username:</label>
+      <input type="text" id="username" name="username" placeholder="username" value=""><br>
+      <label for="password">password:</label>
+      <input type="password" id="password" name="password" value=""><br>
+      <input type="submit" name="submit" value="Submit">
+    </form>
+    <div class="error-message">{{errors}}      
+    </div>
+  </body>
+</html>
