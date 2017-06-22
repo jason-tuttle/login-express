@@ -6,6 +6,14 @@ const bodyParser = require("body-parser");
 
 const app = express();
 
+/*******************************************************************************
+** I'm going to hard-code a list of usernames and passwords
+*******************************************************************************/
+const allUsers = {
+  admin: "password",
+  bob: "vanhalenou812",
+  jason: "12345678"
+}
 app.engine('mustache', mustacheExpress());
 app.set('views', './views');
 app.set('view engine', 'mustache');
@@ -24,20 +32,18 @@ app.use(expressValidator());
 app.use(function(req, res, next) {
 
   if (!req.session.users) {
-    req.session.users = { admin: {pw:"password", username:"admin"} };
-    req.session.status = { loggedIn: false };
+    req.session.users = allUsers;
+    req.session.loggedIn = false;
     req.session.user = "";
     console.log(req.session);
-    res.redirect('login');
   }
   next();
 });
 
 app.get('/', function(req, res) {
   //check if logged in
-  res.send('bacon');
   if (req.session.loggedIn) {
-    res.render('index', { username: req.session.user });
+    res.render('index', { username: req.session.user, loggedIn: true });
   } else {
     res.redirect('login');
   }
@@ -55,7 +61,7 @@ app.post('/login', function(req, res) {
   req.checkBody('username', 'please enter a username').notEmpty();
   req.checkBody('password', 'username and password don\'t match')
     .notEmpty()
-    .equals(req.session.users[req.body.username].pw);
+    .equals(req.session.users[req.body.username]);
   //if good send to '/'
   //if not display error and reload form
   const errors = req.validationErrors();
@@ -64,7 +70,7 @@ app.post('/login', function(req, res) {
   } else {
     req.session.loggedIn = true;
     req.session.user = req.body.username;
-    res.render('index', { username: req.session.user })
+    res.redirect('/');
   }
 });
 
