@@ -7,5 +7,13 @@
   <body>
     <h1>Welcome, {{username}}.</h1>
     <p>You are {{^loggedIn}}not{{/loggedIn}} logged in.</p>
+    <form class="" action="/" method="post">
+    {{#loggedIn}}
+      <button type="submit" name="button">Log Out</button>
+    {{/loggedIn}}
+    {{^loggedIn}}
+      <button type="submit" name="button">Log In</button>
+    {{/loggedIn}}
+    </form>
   </body>
 </html>

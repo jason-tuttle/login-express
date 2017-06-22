@@ -30,7 +30,6 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(expressValidator());
 
 app.use(function(req, res, next) {
-
   if (!req.session.users) {
     req.session.users = allUsers;
     req.session.loggedIn = false;
@@ -42,13 +41,16 @@ app.use(function(req, res, next) {
 
 app.get('/', function(req, res) {
   //check if logged in
-  if (req.session.loggedIn) {
-    res.render('index', { username: req.session.user, loggedIn: true });
-  } else {
+  if (req.session.loggedIn) { //if yes render page
+    res.render('index', { username: req.session.user, loggedIn: req.session.loggedIn });
+  } else { //if no send to '/login'
     res.redirect('login');
   }
-  //if yes render page
-  //if no send to '/login'
+});
+
+app.post('/', function(req, res) {
+  req.session.loggedIn = !req.session.loggedIn;
+  res.render('index', { username: req.session.user, loggedIn: req.session.loggedIn})
 });
 
 app.get('/login', function(req, res) {
